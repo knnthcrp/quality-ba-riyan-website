@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@theme {
+  --color-aqi-good: #10b981;
+  --color-aqi-moderate: #facc15;
+  --color-aqi-unhealthy-sg: #f97316;
+  --color-aqi-unhealthy: #ef4444;
+  --color-aqi-very-unhealthy: #8b5cf6;
+  --color-aqi-hazardous: #7f1d1d;
+  
+  --color-bg-dark: #09090b;
+  --color-panel-dark: #18181b;
+}
+
+body {
+  background-color: var(--color-bg-dark);
+  color: #f8fafc;
+  font-family: "Inter", system-ui, sans-serif;
+  margin: 0;
+  padding: 0;
+}
