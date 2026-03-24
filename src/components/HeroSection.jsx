@@ -2,24 +2,26 @@ import React, { useRef, useEffect } from 'react';
 import gsap from 'gsap';
 import { getAqiInfo } from '../utils/aqiUtils';
 import { Search, MapPin } from 'lucide-react';
+import MetroManilaMap3D from './MetroManilaMap3D';
 
-const HeroSection = ({ 
-  aqiData, 
-  loading, 
-  error, 
-  locationName = 'Locating...', 
-  searchQuery, 
-  setSearchQuery, 
-  handleSearch 
+const HeroSection = ({
+  aqiData,
+  loading,
+  error,
+  locationName = 'Locating...',
+  searchQuery,
+  setSearchQuery,
+  handleSearch
 }) => {
   const containerRef = useRef(null);
-  
+
   const aqiValue = aqiData?.current?.pollution?.aqius || 0;
   const aqiInfo = getAqiInfo(aqiValue);
   const displayAqi = loading ? '--' : aqiValue;
 
   useEffect(() => {
     if (containerRef.current && !loading) {
+      // Animate the left side text
       gsap.fromTo(
         containerRef.current.querySelectorAll('.animate-enter'),
         { y: 30, opacity: 0 },
@@ -28,9 +30,20 @@ const HeroSection = ({
     }
   }, [loading, aqiValue]);
 
+  const onCitySelect = (cityName) => {
+    setSearchQuery(cityName);
+    // Trigger search after a slight delay for state update
+    setTimeout(() => {
+      const form = document.querySelector('form');
+      if (form) {
+        form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+      }
+    }, 50);
+  };
+
   return (
     <div ref={containerRef} className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center py-12">
-      
+
       {/* Left Side */}
       <div className="flex flex-col gap-6 w-full max-w-xl">
         <div className="animate-enter flex items-center gap-2 text-zinc-400 font-medium bg-zinc-900/50 w-fit px-4 py-2 rounded-full border border-zinc-800">
@@ -39,7 +52,7 @@ const HeroSection = ({
         </div>
 
         <h2 className="animate-enter text-5xl md:text-7xl font-extrabold tracking-tight leading-tight">
-          Current <br/>Air Quality
+          Current <br />Air Quality
         </h2>
 
         {/* AQI Big Display */}
@@ -62,8 +75,8 @@ const HeroSection = ({
         {/* Search Bar */}
         <form onSubmit={handleSearch} className="animate-enter relative flex items-center mt-6 w-full group">
           <Search size={20} className="absolute left-4 text-zinc-500 group-focus-within:text-emerald-400 transition-colors" />
-          <input 
-            type="text" 
+          <input
+            type="text"
             placeholder="Search by city (e.g., Makati)"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -76,24 +89,17 @@ const HeroSection = ({
         {error && <p className="animate-enter text-rose-500 text-sm">{error}</p>}
       </div>
 
-      {/* Right Side 3D Placeholder */}
-      <div className="animate-enter h-[500px] w-full bg-zinc-900/60 backdrop-blur-sm rounded-[2rem] border border-zinc-800/80 flex flex-col items-center justify-center relative overflow-hidden group shadow-2xl shadow-emerald-900/10">
-        <div className={`absolute inset-0 bg-gradient-to-tr ${aqiInfo.color.replace('bg-', 'from-')}/10 to-transparent transition-colors duration-1000`}></div>
+      {/* Right Side Interactive 2.5D Map */}
+      <div className="animate-enter h-[600px] w-full bg-zinc-900/40 rounded-[3rem] border border-zinc-800/80 relative group shadow-2xl shadow-emerald-950/20 hidden lg:flex items-center justify-center">
+        {/* Dynamic Glow Background */}
+        <div className={`absolute inset-0 bg-gradient-to-tr ${aqiInfo.color.replace('bg-', 'from-')}/5 to-transparent transition-colors duration-1000 pointer-events-none rounded-[3rem]`}></div>
         
-        {/* Decorative Grid */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px] opacity-20"></div>
-
-        <div className="z-10 bg-zinc-950/80 px-6 py-3 rounded-full border border-zinc-800 backdrop-blur-md">
-          <p className="text-zinc-300 font-mono text-sm group-hover:text-emerald-400 transition-colors flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            3D Spline Scene Placeholder
-          </p>
+        {/* 2.5D Map Component */}
+        <div className="w-full h-full flex items-center justify-center">
+          <MetroManilaMap3D onCitySelect={onCitySelect} />
         </div>
-        <p className="z-10 text-zinc-600 text-xs mt-4 mt-2 max-w-[200px] text-center">
-          (Interactive Metro Manila map will be rendered here)
-        </p>
       </div>
-      
+
     </div>
   );
 };
