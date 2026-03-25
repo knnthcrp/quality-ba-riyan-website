@@ -5,7 +5,7 @@ import { ShieldAlert, ShieldCheck } from 'lucide-react';
 const RecommendationBanner = ({ aqiData, loading }) => {
   if (loading) return null;
 
-  const aqiValue = aqiData?.current?.pollution?.aqius || 0;
+  const aqiValue = aqiData?.aqi ?? aqiData?.current?.pollution?.aqius ?? 0;
   const info = getAqiInfo(aqiValue);
   
   const isGood = aqiValue <= 50;

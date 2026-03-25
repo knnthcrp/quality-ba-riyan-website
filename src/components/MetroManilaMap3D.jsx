@@ -19,6 +19,7 @@ const MAP_LGUS = [
   { id: 'sanjuan', name: 'San Juan', path: "M489.28,502.96 L423.65,530.54 L400.71,518.96 L376.41,495.09 L392.30,471.56 L431.30,490.82 L464.31,482.39 L489.28,502.96 Z", color: "#ea580c" },
   { id: 'taguig', name: 'Taguig', path: "M591.27,663.01 L617.05,692.42 L588.46,706.25 L570.85,746.66 L530.34,738.13 L503.31,788.29 L487.05,858.46 L456.14,854.99 L459.98,769.11 L429.54,752.20 L395.05,686.78 L442.27,733.60 L485.56,707.71 L512.22,670.61 L545.86,646.39 L591.27,663.01 Z", color: "#1e1b4b" },
   { id: 'valenzuela', name: 'Valenzuela', path: "M389.27,227.82 L403.90,274.06 L366.68,294.46 L335.67,287.90 L292.97,325.76 L226.18,276.45 L218.19,219.13 L199.15,220.96 L166.90,162.43 L201.15,148.20 L248.80,168.12 L272.09,210.28 L319.26,203.74 L314.22,156.25 L346.89,131.52 L376.27,141.25 L354.01,220.14 L389.27,227.82 Z", color: "#374151" },
+
 ];
 
 const MetroManilaMap3D = ({ onCitySelect }) => {
@@ -38,7 +39,7 @@ const MetroManilaMap3D = ({ onCitySelect }) => {
   return (
     <div className="w-full h-full flex flex-col items-center justify-center relative perspective-[1500px] overflow-visible">
       <motion.div
-        className="w-full h-full flex items-center justify-center translate-y-[-5%]"
+        className="w-full h-full flex items-center justify-center translate-y-[2%]"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -100,26 +101,21 @@ const MetroManilaMap3D = ({ onCitySelect }) => {
       {/* City Label Overlay - Positioned safely within parent */}
       <AnimatePresence>
         <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 10 }}
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 px-8 py-4 bg-zinc-950/90 border border-zinc-700/50 rounded-3xl backdrop-blur-2xl shadow-[0_20px_40px_rgba(0,0,0,0.6)] z-50 flex flex-col items-center gap-1 min-w-[200px]"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -10 }}
+          className="absolute bottom-10 left-10 px-8 py-4 bg-zinc-950/90 border border-zinc-700/50 rounded-3xl backdrop-blur-2xl shadow-[0_20px_40px_rgba(0,0,0,0.6)] z-50 flex flex-col items-start gap-1 min-w-[200px]"
         >
-          <p className="text-zinc-500 font-mono text-[10px] tracking-[0.3em] uppercase whitespace-nowrap">
+          <p className="text-zinc-500 font-mono text-[10px] tracking-[0.3em] uppercase whitespace-nowrap text-left">
             {hoveredCity ? "Selected Sector" : "Region Overview"}
           </p>
-          <p className="text-emerald-400 font-bold text-xl tracking-tight">
+          <p className="text-emerald-400 font-bold text-xl tracking-tight text-left">
             {hoveredCity ? MAP_LGUS.find(c => c.id === hoveredCity)?.name : "Metro Manila"}
           </p>
         </motion.div>
       </AnimatePresence>
       
-      <div className="absolute top-8 left-8 z-40 flex flex-col items-start gap-1">
-        <div className="flex items-center gap-3 bg-zinc-950/50 px-4 py-1.5 rounded-full border border-zinc-800 backdrop-blur-md">
-          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_#10b981]"></div>
-          <span className="text-zinc-300 font-mono text-[11px] uppercase font-bold tracking-widest">Interactive 2.5D</span>
-        </div>
-      </div>
+      {/* Removed "Interactive 2.5D" badge */}
     </div>
   );
 };

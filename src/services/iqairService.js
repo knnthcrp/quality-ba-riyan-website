@@ -1,39 +1,30 @@
 import axios from 'axios';
 
-const IQAIR_BASE_URL = 'https://api.airvisual.com/v2';
-const API_KEY = import.meta.env.VITE_IQAIR_API_KEY;
+const BACKEND_URL = 'http://localhost:5000/api';
 
-export const getNearestCityData = async (lat, lon) => {
+/**
+ * Note: For the MVP, we are using the city-based search via our backend.
+ * The backend proxies IQAir and provides standardized, cached data.
+ */
+export const getCityDataByName = async (city) => {
   try {
-    const response = await axios.get(`${IQAIR_BASE_URL}/nearest_city`, {
-      params: {
-        lat,
-        lon,
-        key: API_KEY,
-      },
+    const response = await axios.get(`${BACKEND_URL}/air-quality`, {
+      params: { city },
     });
     return response.data;
   } catch (error) {
-    console.error('Error fetching nearest city AQI data:', error);
+    console.error('Error fetching city air quality from backend:', error);
     throw error;
   }
 };
 
-// Note: For searching specific cities, the IQAir free API requires state and country.
-// We default to Metro Manila, Philippines for the MVP specific criteria.
-export const getCityDataByName = async (city, state = 'Metro Manila', country = 'Philippines') => {
-  try {
-    const response = await axios.get(`${IQAIR_BASE_URL}/city`, {
-      params: {
-        city,
-        state,
-        country,
-        key: API_KEY,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching city AQI data:', error);
-    throw error;
-  }
+/**
+ * Geolocation-based data placeholder. 
+ * For now, we fallback to city-based search using the detected city name,
+ * or default to Manila if the backend doesn't support lat/lon yet.
+ */
+export const getNearestCityData = async (lat, lon) => {
+  // In a real scenario, the backend would have a /nearest-city endpoint.
+  // For this MVP transition, we'll default to Manila or a known city.
+  return getCityDataByName('Manila');
 };

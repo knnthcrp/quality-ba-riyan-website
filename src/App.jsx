@@ -28,7 +28,7 @@ function App() {
         try {
           const data = await getNearestCityData(location.lat, location.lon);
           setAqiData(data);
-          setLocationName(`${data.city}, ${data.state}`);
+          setLocationName(data.city);
         } catch (err) {
           setError('Failed to fetch local AQI data. API key may be pending or rate limit exceeded.');
         } finally {
@@ -62,7 +62,7 @@ function App() {
 
   useEffect(() => {
     if (notificationsEnabled && aqiData) {
-      const aqiValue = aqiData.current?.pollution?.aqius || 0;
+      const aqiValue = aqiData?.aqi ?? aqiData?.current?.pollution?.aqius ?? 0;
       sendAqiNotification(aqiValue, aqiData.city);
     }
     
@@ -70,7 +70,7 @@ function App() {
     // For MVP demonstration, simulated as 1 hr.
     const interval = setInterval(() => {
       if (notificationsEnabled && aqiData) {
-        const aqiValue = aqiData.current?.pollution?.aqius || 0;
+        const aqiValue = aqiData?.aqi ?? aqiData.current?.pollution?.aqius ?? 0;
         sendAqiNotification(aqiValue, aqiData.city);
       }
     }, 3600000);
@@ -83,7 +83,7 @@ function App() {
       const granted = await requestNotificationPermission();
       setNotificationsEnabled(granted);
       if (granted && aqiData) {
-         const aqiValue = aqiData.current?.pollution?.aqius || 0;
+         const aqiValue = aqiData?.aqi ?? aqiData.current?.pollution?.aqius ?? 0;
          sendAqiNotification(aqiValue, aqiData.city);
       }
     } else {
@@ -102,7 +102,7 @@ function App() {
     try {
       const data = await getCityDataByName(searchQuery);
       setAqiData(data);
-      setLocationName(`${data.city}, ${data.state}`);
+      setLocationName(data.city);
     } catch (err) {
       setError(`Could not find air quality data for "${searchQuery}". Ensure it's a valid PH city.`);
     } finally {
@@ -116,7 +116,7 @@ function App() {
       <div className="min-h-screen bg-zinc-950 text-slate-50 flex flex-col font-sans selection:bg-emerald-500/30">
         
         {/* Navbar */}
-        <header className="w-full py-6 px-8 flex justify-between items-center bg-zinc-950/80 backdrop-blur-md sticky top-0 z-50 border-b border-zinc-800/50">
+        <header className="w-full py-4 px-8 flex justify-between items-center bg-zinc-950/80 backdrop-blur-md sticky top-0 z-50 border-b border-zinc-800/50">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.5)]">
               <div className="w-3 h-3 bg-zinc-950 rounded-full animate-pulse"></div>
@@ -137,7 +137,7 @@ function App() {
         </header>
 
         {/* Main Content */}
-        <main className="flex-grow flex flex-col px-4 sm:px-8 py-8 md:py-16 max-w-7xl mx-auto w-full relative">
+        <main className="flex-grow flex flex-col px-4 sm:px-8 pt-8 md:pt-12 pb-4 max-w-7xl mx-auto w-full relative">
           
           <HeroSection 
             aqiData={aqiData}

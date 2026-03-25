@@ -15,7 +15,8 @@ const HeroSection = ({
 }) => {
   const containerRef = useRef(null);
 
-  const aqiValue = aqiData?.current?.pollution?.aqius || 0;
+  // Support both standardized backend format and raw IQAir format
+  const aqiValue = aqiData?.aqi ?? aqiData?.current?.pollution?.aqius ?? 0;
   const aqiInfo = getAqiInfo(aqiValue);
   const displayAqi = loading ? '--' : aqiValue;
 
@@ -42,21 +43,21 @@ const HeroSection = ({
   };
 
   return (
-    <div ref={containerRef} className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center py-12">
+    <div ref={containerRef} className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center pt-0 pb-12">
 
       {/* Left Side */}
-      <div className="flex flex-col gap-6 w-full max-w-xl">
+      <div className="flex flex-col gap-4 w-full max-w-xl">
         <div className="animate-enter flex items-center gap-2 text-zinc-400 font-medium bg-zinc-900/50 w-fit px-4 py-2 rounded-full border border-zinc-800">
           <MapPin size={18} className="text-emerald-400" />
           <span>{locationName}</span>
         </div>
 
-        <h2 className="animate-enter text-5xl md:text-7xl font-extrabold tracking-tight leading-tight">
-          Current <br />Air Quality
+        <h2 className="animate-enter text-4xl md:text-6xl font-extrabold tracking-tight leading-tight">
+          Current Air Quality
         </h2>
 
         {/* AQI Big Display */}
-        <div className="animate-enter flex items-end gap-4 mt-4">
+        <div className="animate-enter flex items-end gap-3 mt-2">
           <div className={`text-8xl md:text-9xl font-black ${aqiInfo.text} leading-none tracking-tighter`}>
             {displayAqi}
           </div>
@@ -68,12 +69,12 @@ const HeroSection = ({
           </div>
         </div>
 
-        <p className="animate-enter text-lg text-zinc-400 max-w-lg mt-2 font-medium">
+        <p className="animate-enter text-base text-zinc-400 max-w-lg mt-1 font-medium italic">
           {loading ? 'Fetching latest data from sensors...' : aqiInfo.message}
         </p>
 
         {/* Search Bar */}
-        <form onSubmit={handleSearch} className="animate-enter relative flex items-center mt-6 w-full group">
+        <form onSubmit={handleSearch} className="animate-enter relative flex items-center mt-4 w-full group">
           <Search size={20} className="absolute left-4 text-zinc-500 group-focus-within:text-emerald-400 transition-colors" />
           <input
             type="text"

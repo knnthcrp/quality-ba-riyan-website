@@ -4,13 +4,14 @@ import { Wind, ChevronUp, Droplets } from 'lucide-react';
 // IQAir Free API primarily returns main pollutant, but we can display mock/estimated values based on AQI to fulfill the MVP card requirements.
 const PollutantCards = ({ aqiData, loading }) => {
   // Simple estimation logic for visual purposes only, since free API doesn't give PM arrays.
-  const aqiValue = aqiData?.current?.pollution?.aqius || 0;
+  const aqiValue = aqiData?.aqi ?? aqiData?.current?.pollution?.aqius ?? 0;
   
+  // Use real pollutant data if provided by the backend, otherwise fallback to estimates
   const pollutants = [
     {
       id: 'pm25',
       name: 'PM2.5',
-      value: loading ? '--' : (aqiValue * 0.4).toFixed(1),
+      value: loading ? '--' : (aqiData?.pollutants?.pm2_5 ?? (aqiValue * 0.4).toFixed(1)),
       unit: 'µg/m³',
       icon: <Wind size={24} className="text-emerald-400" />,
       desc: 'Fine particulate matter',
@@ -18,7 +19,7 @@ const PollutantCards = ({ aqiData, loading }) => {
     {
       id: 'pm10',
       name: 'PM10',
-      value: loading ? '--' : (aqiValue * 0.8).toFixed(1),
+      value: loading ? '--' : (aqiData?.pollutants?.pm10 ?? (aqiValue * 0.8).toFixed(1)),
       unit: 'µg/m³',
       icon: <Droplets size={24} className="text-emerald-400" />,
       desc: 'Coarse particulate matter',
@@ -26,7 +27,7 @@ const PollutantCards = ({ aqiData, loading }) => {
     {
       id: 'co',
       name: 'CO',
-      value: loading ? '--' : (aqiValue * 0.05).toFixed(2),
+      value: loading ? '--' : (aqiData?.pollutants?.co ?? (aqiValue * 0.05).toFixed(2)),
       unit: 'ppm',
       icon: <ChevronUp size={24} className="text-emerald-400" />,
       desc: 'Carbon Monoxide',
