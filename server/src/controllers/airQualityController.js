@@ -2,20 +2,18 @@ const { fetchAirQuality } = require('../services/iqairService');
 
 /**
  * Controller for air quality requests
+ * Refactored for serverless compatibility (returns data directly)
  */
-const getAirQuality = async (req, res) => {
-  const { city } = req.query;
-
+const getAirQuality = async (city) => {
   if (!city) {
-    return res.status(400).json({
-      error: true,
-      message: "City query parameter is required"
-    });
+    const error = new Error("City query parameter is required");
+    error.status = 400;
+    throw error;
   }
 
   try {
     const data = await fetchAirQuality(city);
-    return res.json(data);
+    return data;
   } catch (error) {
     console.error(`[Controller] Error for city ${city}:`, error.message);
     
@@ -27,10 +25,9 @@ const getAirQuality = async (req, res) => {
       status = 429;
     }
 
-    return res.status(status).json({
-      error: true,
-      message: error.message || "Failed to fetch air quality data"
-    });
+    const customError = new Error(error.message || "Failed to fetch air quality data");
+    customError.status = status;
+    throw customError;
   }
 };
 

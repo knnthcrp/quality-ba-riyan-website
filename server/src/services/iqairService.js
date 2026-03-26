@@ -35,9 +35,37 @@ const LGU_COORDINATES = {
  * Uses coordinate lookup for LGUs for 100% reliability
  */
 const fetchAirQuality = async (city) => {
-  const normalizedCity = city.toLowerCase().trim();
+  // Robust Normalization: remove 'city', 'xity', 'municipality' and extra spaces
+  let normalizedCity = city.toLowerCase()
+    .replace(/\s+city$/, '')
+    .replace(/\s+xity$/, '') // Handle user's observed typo/variation
+    .replace(/\s+municipality$/, '')
+    .trim();
   
-  // Check cache first
+  // Also check if the raw input (without 'city') is a key in LGU_COORDINATES
+  // But LGU_COORDINATES currently has 'quezon city' and 'las piñas' (no city)
+  // Let's make the lookup check both ways.
+  
+  const findLgu = (searchTerm) => {
+    // 1. Direct match (e.g., 'makati')
+    if (LGU_COORDINATES[searchTerm]) return LGU_COORDINATES[searchTerm];
+    
+    // 2. Multi-word direct match (e.g., 'quezon city')
+    if (LGU_COORDINATES[`${searchTerm} city`]) return LGU_COORDINATES[`${searchTerm} city`];
+    
+    // 3. Check all keys and see if our search term matches the "base" of an LGU name
+    // (e.g., 'quezon' matches 'quezon city')
+    for (const [name, coords] of Object.entries(LGU_COORDINATES)) {
+      const baseName = name.replace(/\s+city$/, '').replace(/\s+municipality$/, '');
+      if (baseName === searchTerm) return coords;
+    }
+    
+    return null;
+  };
+
+  const lgu = findLgu(normalizedCity);
+  
+  // Check cache first (using normalized name for consistency)
   const cachedData = cache.get(normalizedCity);
   if (cachedData) {
     console.log(`[Cache] Hit for: ${normalizedCity}`);
@@ -49,8 +77,6 @@ const fetchAirQuality = async (city) => {
 
   try {
     let response;
-    const lgu = LGU_COORDINATES[normalizedCity];
-
     if (lgu) {
       // Use Coordinate lookup for LGUs (Guaranteed result from nearest_city)
       console.log(`[API] LGU Match: Fetching via coordinates for ${normalizedCity}`);

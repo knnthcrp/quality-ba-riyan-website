@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const BACKEND_URL = '/api';
 
 /**
  * Note: For the MVP, we are using the city-based search via our backend.
@@ -11,10 +11,12 @@ export const getCityDataByName = async (city) => {
     const response = await axios.get(`${BACKEND_URL}/air-quality`, {
       params: { city },
     });
-    return response.data;
+    // Return the 'data' property from the standardized response format { success: true, data: ... }
+    return response.data.data;
   } catch (error) {
-    console.error('Error fetching city air quality from backend:', error);
-    throw error;
+    const errorMessage = error.response?.data?.error || error.message;
+    console.error('Error fetching city air quality from backend:', errorMessage);
+    throw new Error(errorMessage);
   }
 };
 
