@@ -16,6 +16,7 @@ function App() {
   const [error, setError] = useState(null);
   const [locationName, setLocationName] = useState('Locating...');
   const [searchQuery, setSearchQuery] = useState('');
+  const [lastUpdated, setLastUpdated] = useState(null);
   
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
@@ -29,6 +30,7 @@ function App() {
           const data = await getNearestCityData(location.lat, location.lon);
           setAqiData(data);
           setLocationName(data.city);
+          setLastUpdated(new Date());
         } catch (err) {
           setError('Failed to fetch local AQI data. API key may be pending or rate limit exceeded.');
         } finally {
@@ -41,6 +43,7 @@ function App() {
           const data = await getCityDataByName('Manila');
           setAqiData(data);
           setLocationName(`${data.city}, ${data.state} (Default)`);
+          setLastUpdated(new Date());
         } catch (err) {
           setError('Failed to fetch default City AQI data.');
         } finally {
@@ -103,6 +106,7 @@ function App() {
       const data = await getCityDataByName(searchQuery);
       setAqiData(data);
       setLocationName(data.city);
+      setLastUpdated(new Date());
     } catch (err) {
       setError(`Could not find air quality data for "${searchQuery}". Ensure it's a valid PH city.`);
     } finally {
@@ -147,6 +151,7 @@ function App() {
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
             handleSearch={handleSearch}
+            lastUpdated={lastUpdated}
           />
 
           <RecommendationBanner 

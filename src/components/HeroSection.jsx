@@ -1,7 +1,8 @@
 import React, { useRef, useEffect } from 'react';
 import gsap from 'gsap';
 import { getAqiInfo } from '../utils/aqiUtils';
-import { Search, MapPin } from 'lucide-react';
+import { Search, MapPin, Clock } from 'lucide-react';
+import { formatRelativeTime } from '../utils/timeUtils';
 import MetroManilaMap3D from './MetroManilaMap3D';
 
 const HeroSection = ({
@@ -11,9 +12,22 @@ const HeroSection = ({
   locationName = 'Locating...',
   searchQuery,
   setSearchQuery,
-  handleSearch
+  handleSearch,
+  lastUpdated
 }) => {
   const containerRef = useRef(null);
+  const [tick, setTick] = React.useState(0);
+
+  // Auto-update relative time every minute
+  useEffect(() => {
+    if (!lastUpdated) return;
+    
+    const interval = setInterval(() => {
+      setTick(t => t + 1);
+    }, 60000);
+    
+    return () => clearInterval(interval);
+  }, [lastUpdated]);
 
   // Support both standardized backend format and raw IQAir format
   const aqiValue = aqiData?.aqi ?? aqiData?.current?.pollution?.aqius ?? 0;
@@ -72,6 +86,19 @@ const HeroSection = ({
         <p className="animate-enter text-base text-zinc-400 max-w-lg mt-1 font-medium italic">
           {loading ? 'Fetching latest data from sensors...' : aqiInfo.message}
         </p>
+
+        {/* Last Updated & Source Attribution */}
+        {!loading && lastUpdated && (
+          <div className="animate-enter flex flex-col gap-1.5 mt-2">
+            <div className="flex items-center gap-1.5 text-zinc-500 text-sm">
+              <Clock size={14} />
+              <span>Last updated: {formatRelativeTime(lastUpdated)}</span>
+            </div>
+            <div className="text-xs text-zinc-600 font-medium">
+              Source: IQAir AirVisual API
+            </div>
+          </div>
+        )}
 
         {/* Search Bar */}
         <form onSubmit={handleSearch} className="animate-enter relative flex items-center mt-4 w-full group">
