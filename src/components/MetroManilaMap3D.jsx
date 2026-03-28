@@ -22,8 +22,13 @@ const MAP_LGUS = [
 
 ];
 
-const MetroManilaMap3D = ({ onCitySelect }) => {
+const MetroManilaMap3D = ({ onCitySelect, selectedCityName }) => {
   const [hoveredCity, setHoveredCity] = useState(null);
+
+  // Normalize selectedCityName for matching (e.g. "Quezon City" matches "Quezon City")
+  const selectedId = selectedCityName 
+    ? MAP_LGUS.find(lgu => lgu.name.toLowerCase() === selectedCityName.toLowerCase())?.id 
+    : null;
 
   const containerVariants = {
     hidden: { opacity: 0, rotateX: 45, scale: 0.8 },
@@ -52,32 +57,37 @@ const MetroManilaMap3D = ({ onCitySelect }) => {
         >
           <defs>
             <filter id="box-shadow-hover" x="-50%" y="-50%" width="200%" height="200%">
-              <feDropShadow dx="0" dy="15" stdDeviation="10" floodColor="#000" floodOpacity="1" />
-              <feDropShadow dx="0" dy="25" stdDeviation="20" floodColor="#000" floodOpacity="0.8" />
+              <feDropShadow dx="0" dy="15" stdDeviation="15" floodColor="#000" floodOpacity="1" />
+            </filter>
+            
+            <filter id="selected-glow" x="-50%" y="-50%" width="200%" height="200%">
+              <feDropShadow dx="0" dy="0" stdDeviation="10" floodColor="#10b981" floodOpacity="0.8" />
+              <feDropShadow dx="0" dy="0" stdDeviation="20" floodColor="#10b981" floodOpacity="0.4" />
             </filter>
           </defs>
           
           <g style={{ transformStyle: "preserve-3d" }}>
             {MAP_LGUS.map((lgu) => {
               const isHovered = hoveredCity === lgu.id;
+              const isSelected = selectedId === lgu.id;
               
               return (
                 <motion.path
                   key={lgu.id}
                   id={lgu.id}
                   d={lgu.path}
-                  fill={isHovered ? "#10b981" : lgu.color} 
-                  stroke="#09090b"
-                  strokeWidth={2}
+                  fill={isHovered || isSelected ? "#10b981" : lgu.color} 
+                  stroke={isSelected ? "#10b981" : "#09090b"}
+                  strokeWidth={isSelected ? 3 : 2}
                   strokeLinejoin="round"
                   onClick={() => onCitySelect && onCitySelect(lgu.name)}
                   onMouseEnter={() => setHoveredCity(lgu.id)}
                   onMouseLeave={() => setHoveredCity(null)}
                   animate={{
-                    z: isHovered ? 45 : 0, 
-                    y: isHovered ? -25 : 0,
-                    scale: isHovered ? 1.04 : 1,
-                    filter: isHovered ? "url(#box-shadow-hover)" : "none",
+                    z: isHovered || isSelected ? 45 : 0, 
+                    y: isHovered || isSelected ? -25 : 0,
+                    scale: isHovered || isSelected ? 1.04 : 1,
+                    filter: isHovered ? "url(#box-shadow-hover)" : (isSelected ? "url(#selected-glow)" : "none"),
                   }}
                   transition={{
                     type: "spring",

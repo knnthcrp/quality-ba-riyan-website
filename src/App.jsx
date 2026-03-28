@@ -42,7 +42,7 @@ function App() {
         try {
           const data = await getCityDataByName('Manila');
           setAqiData(data);
-          setLocationName(`${data.city}, ${data.state} (Default)`);
+          setLocationName(data.city);
           setLastUpdated(new Date());
         } catch (err) {
           setError('Failed to fetch default City AQI data.');
@@ -98,16 +98,20 @@ function App() {
   // Handle Search Functionality
   const handleSearch = async (e) => {
     e.preventDefault();
+    console.log('[App] handleSearch called with:', searchQuery);
     if (!searchQuery.trim()) return;
 
     setLoading(true);
     setError(null);
     try {
+      console.log('[App] Calling getCityDataByName...');
       const data = await getCityDataByName(searchQuery);
+      console.log('[App] Data received:', data);
       setAqiData(data);
       setLocationName(data.city);
       setLastUpdated(new Date());
     } catch (err) {
+      console.error('[App] Search error:', err);
       setError(`Could not find air quality data for "${searchQuery}". Ensure it's a valid PH city.`);
     } finally {
       setLoading(false);

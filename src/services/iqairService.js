@@ -7,15 +7,17 @@ const BACKEND_URL = '/api';
  * The backend proxies IQAir and provides standardized, cached data.
  */
 export const getCityDataByName = async (city) => {
+  console.log('[Service] getCityDataByName fetching for:', city);
   try {
     const response = await axios.get(`${BACKEND_URL}/air-quality`, {
       params: { city },
     });
+    console.log('[Service] Response received:', response.data);
     // Return the 'data' property from the standardized response format { success: true, data: ... }
     return response.data.data;
   } catch (error) {
     const errorMessage = error.response?.data?.error || error.message;
-    console.error('Error fetching city air quality from backend:', errorMessage);
+    console.error('[Service] Error fetching city air quality from backend:', errorMessage);
     throw new Error(errorMessage);
   }
 };

@@ -124,7 +124,7 @@ const HeroSection = ({
         
         {/* 2.5D Map Component */}
         <div className="w-full h-full flex items-center justify-center">
-          <MetroManilaMap3D onCitySelect={onCitySelect} />
+          <MetroManilaMap3D onCitySelect={onCitySelect} selectedCityName={locationName} />
         </div>
       </div>
 

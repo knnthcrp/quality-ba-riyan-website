@@ -5,14 +5,18 @@ const { fetchAirQuality } = require('../services/iqairService');
  * Refactored for serverless compatibility (returns data directly)
  */
 const getAirQuality = async (city) => {
+  console.log('[Controller] getAirQuality called for:', city);
   if (!city) {
+    console.warn('[Controller] Missing city parameter');
     const error = new Error("City query parameter is required");
     error.status = 400;
     throw error;
   }
 
   try {
+    console.log('[Controller] Fetching data from service...');
     const data = await fetchAirQuality(city);
+    console.log('[Controller] Data fetched successfully');
     return data;
   } catch (error) {
     console.error(`[Controller] Error for city ${city}:`, error.message);
