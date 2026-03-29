@@ -1,23 +1,40 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import SmoothScroll from './components/SmoothScroll';
 import useGeolocation from './hooks/useGeolocation';
+import useSearchAQI from './hooks/useSearchAQI';
 import HeroSection from './components/HeroSection';
 import PollutantCards from './components/PollutantCards';
 import RecommendationBanner from './components/RecommendationBanner';
-import { getNearestCityData, getCityDataByName } from './services/iqairService';
+import { getNearestCityData } from './services/iqairService';
 import { requestNotificationPermission, sendAqiNotification } from './utils/notificationUtils';
 import { Bell, BellOff } from 'lucide-react';
 
 function App() {
   const { location, error: geoError, loading: geoLoading } = useGeolocation();
-  
+
   const [aqiData, setAqiData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [locationName, setLocationName] = useState('Locating...');
-  const [searchQuery, setSearchQuery] = useState('');
   const [lastUpdated, setLastUpdated] = useState(null);
-  
+
+  // Search hook — preserves existing aqiData on failed searches
+  const handleSearchSuccess = useCallback((data, name) => {
+    setAqiData(data);
+    setLocationName(name);
+    setLastUpdated(new Date());
+    setError(null); // clear any previous global error
+  }, []);
+
+  const {
+    query: searchQuery,
+    setQuery: setSearchQuery,
+    error: searchError,
+    isSearching,
+    handleSubmit: handleSearch,
+    triggerSearch,
+  } = useSearchAQI(handleSearchSuccess);
+
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
   // Fetch nearest city data based on geolocation
@@ -45,7 +62,7 @@ function App() {
           setLocationName(data.city);
           setLastUpdated(new Date());
         } catch (err) {
-          setError('Failed to fetch default City AQI data.');
+          setError('Failed to load AQI data. Check your connection and try again.');
         } finally {
           setLoading(false);
         }
@@ -68,7 +85,7 @@ function App() {
       const aqiValue = aqiData?.aqi ?? aqiData?.current?.pollution?.aqius ?? 0;
       sendAqiNotification(aqiValue, aqiData.city);
     }
-    
+
     // Set up interval check (e.g. every 1 hour = 3600000ms)
     // For MVP demonstration, simulated as 1 hr.
     const interval = setInterval(() => {
@@ -86,8 +103,8 @@ function App() {
       const granted = await requestNotificationPermission();
       setNotificationsEnabled(granted);
       if (granted && aqiData) {
-         const aqiValue = aqiData?.aqi ?? aqiData.current?.pollution?.aqius ?? 0;
-         sendAqiNotification(aqiValue, aqiData.city);
+        const aqiValue = aqiData?.aqi ?? aqiData.current?.pollution?.aqius ?? 0;
+        sendAqiNotification(aqiValue, aqiData.city);
       }
     } else {
       setNotificationsEnabled(false);
@@ -95,34 +112,12 @@ function App() {
     }
   };
 
-  // Handle Search Functionality
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    console.log('[App] handleSearch called with:', searchQuery);
-    if (!searchQuery.trim()) return;
-
-    setLoading(true);
-    setError(null);
-    try {
-      console.log('[App] Calling getCityDataByName...');
-      const data = await getCityDataByName(searchQuery);
-      console.log('[App] Data received:', data);
-      setAqiData(data);
-      setLocationName(data.city);
-      setLastUpdated(new Date());
-    } catch (err) {
-      console.error('[App] Search error:', err);
-      setError(`Could not find air quality data for "${searchQuery}". Ensure it's a valid PH city.`);
-    } finally {
-      setLoading(false);
-      setSearchQuery('');
-    }
-  };
+  // Search is now handled by useSearchAQI hook
 
   return (
     <SmoothScroll>
       <div className="min-h-screen bg-zinc-950 text-slate-50 flex flex-col font-sans selection:bg-emerald-500/30">
-        
+
         {/* Navbar */}
         <header className="w-full py-4 px-8 flex justify-between items-center bg-zinc-950/80 backdrop-blur-md sticky top-0 z-50 border-b border-zinc-800/50">
           <div className="flex items-center gap-3">
@@ -133,7 +128,7 @@ function App() {
           </div>
           <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-zinc-400">
             <a href="#" className="hover:text-emerald-400 transition-colors">Dashboard</a>
-            <button 
+            <button
               onClick={handleToggleNotifications}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-colors ${notificationsEnabled ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400' : 'border-zinc-800 hover:border-zinc-700'}`}
               title="Toggle AQI > 100 Alerts"
@@ -145,29 +140,32 @@ function App() {
         </header>
 
         {/* Main Content */}
-        <main className="flex-grow flex flex-col px-4 sm:px-8 pt-8 md:pt-12 pb-4 max-w-7xl mx-auto w-full relative">
-          
-          <HeroSection 
+        <main id="main-content" className="flex-grow flex flex-col px-4 sm:px-8 pt-8 md:pt-12 pb-4 max-w-7xl mx-auto w-full relative">
+
+          <HeroSection
             aqiData={aqiData}
             loading={loading || geoLoading}
             error={error}
+            searchError={searchError}
+            isSearching={isSearching}
             locationName={locationName}
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
             handleSearch={handleSearch}
+            triggerSearch={triggerSearch}
             lastUpdated={lastUpdated}
           />
 
-          <RecommendationBanner 
-            aqiData={aqiData} 
-            loading={loading || geoLoading} 
+          <RecommendationBanner
+            aqiData={aqiData}
+            loading={loading || geoLoading}
           />
 
-          <PollutantCards 
-            aqiData={aqiData} 
-            loading={loading || geoLoading} 
+          <PollutantCards
+            aqiData={aqiData}
+            loading={loading || geoLoading}
           />
-          
+
         </main>
 
         {/* Footer */}

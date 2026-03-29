@@ -5,10 +5,17 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quality ba riyan?</title>
+  <meta name="description"
+    content="Real-time air quality monitoring for Metro Manila. Check AQI, pollutant levels, and health recommendations for your city." />
+  <title>Quality ba riyan? — Metro Manila Air Quality</title>
 </head>
 
 <body>
+  <!-- Skip navigation link (WCAG 2.4.1) — visible on keyboard focus only -->
+  <a href="#main-content"
+    class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-emerald-500 focus:text-zinc-950 focus:font-bold focus:rounded-xl focus:shadow-lg">
+    Skip to main content
+  </a>
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
 </body>
